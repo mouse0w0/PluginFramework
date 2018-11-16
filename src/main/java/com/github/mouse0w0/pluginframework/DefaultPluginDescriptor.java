@@ -1,11 +1,29 @@
 package com.github.mouse0w0.pluginframework;
 
+import com.github.mouse0w0.version.ComparableVersion;
+
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 public class DefaultPluginDescriptor implements PluginDescriptor {
     @Override
+    public String getId() {
+        return null;
+    }
+
+    @Override
+    public ComparableVersion getVersion() {
+        return null;
+    }
+
+    @Override
     public String getName() {
+        return null;
+    }
+
+    @Override
+    public String getMainClass() {
         return null;
     }
 
@@ -36,6 +54,11 @@ public class DefaultPluginDescriptor implements PluginDescriptor {
 
     @Override
     public Map<String, Object> getMetadata() {
+        return null;
+    }
+
+    @Override
+    public Path getPluginPath() {
         return null;
     }
 }
