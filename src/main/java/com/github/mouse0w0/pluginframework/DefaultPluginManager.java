@@ -17,11 +17,6 @@ public class DefaultPluginManager extends AbstractPluginManager {
     }
 
     @Override
-    public void unloadPlugin(PluginContainer container) {
-
-    }
-
-    @Override
     public List<PluginContainer> getPlugins() {
         return null;
     }

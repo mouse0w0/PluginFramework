@@ -8,7 +8,7 @@ public interface PluginContainer {
 
     Object getInstance();
 
-    ClassLoader getClassLoader();
+    PluginClassLoader getClassLoader();
 
     PluginDescriptor getDescriptor();
 }

@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class PluginClassLoader extends URLClassLoader {
+public abstract class PluginClassLoader extends URLClassLoader {
 
     private static final String JAVA_PACKAGE_PREFIX = "java.";
 
@@ -20,7 +20,7 @@ public class PluginClassLoader extends URLClassLoader {
 
     private final Set<Class<?>> loadedClass = new HashSet<>();
 
-    public PluginClassLoader(Logger logger, Path src, ClassLoader parent) {
+    public PluginClassLoader(Path src, Logger logger, ClassLoader parent) {
         super(new URL[0], parent);
         this.logger = logger;
         addPath(src);
