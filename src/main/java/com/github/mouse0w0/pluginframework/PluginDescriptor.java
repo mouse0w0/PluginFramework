@@ -12,6 +12,8 @@ public interface PluginDescriptor {
 
     ComparableVersion getVersion();
 
+    Path getPluginPath();
+
     String getName();
 
     String getMainClass();
@@ -28,5 +30,4 @@ public interface PluginDescriptor {
 
     Map<String, Object> getMetadata();
 
-    Path getPluginPath();
 }

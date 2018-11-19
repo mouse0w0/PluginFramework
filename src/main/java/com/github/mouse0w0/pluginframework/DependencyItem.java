@@ -1,7 +1,8 @@
 package com.github.mouse0w0.pluginframework;
 
 import com.github.mouse0w0.pluginframework.util.StringUtils;
-import com.github.mouse0w0.version.ComparableVersion;
+import com.github.mouse0w0.version.InvalidVersionSpecificationException;
+import com.github.mouse0w0.version.VersionRange;
 
 import java.util.Objects;
 
@@ -17,48 +18,34 @@ public class DependencyItem {
         if (args.length < 2) {
             throw new IllegalArgumentException("Illegal dependency.");
         }
-        return new DependencyItem(args[0], new ComparableVersion(args[1]));
+        try {
+            return new DependencyItem(args[0], VersionRange.createFromVersionSpec(args[1]));
+        } catch (InvalidVersionSpecificationException e) {
+            throw new IllegalArgumentException("Illegal version range.");
+        }
     }
 
     private final String id;
-    private final ComparableVersion version;
+    private final VersionRange versionRange;
 
-    public DependencyItem(String id, ComparableVersion version) {
+    public DependencyItem(String id, VersionRange versionRange) {
         this.id = Objects.requireNonNull(id);
-        this.version = Objects.requireNonNull(version);
+        this.versionRange = Objects.requireNonNull(versionRange);
     }
 
     public String getId() {
         return id;
     }
 
-    public ComparableVersion getVersion() {
-        return version;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DependencyItem that = (DependencyItem) o;
-
-        if (!id.equals(that.id)) return false;
-        return version.equals(that.version);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + version.hashCode();
-        return result;
+    public VersionRange getVersionRange() {
+        return versionRange;
     }
 
     @Override
     public String toString() {
         return "DependencyItem{" +
                 "id='" + id + '\'' +
-                ", version=" + version +
+                ", versionRange=" + versionRange +
                 '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.github.mouse0w0.pluginframework;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,49 +16,37 @@ public abstract class PluginClassLoader extends URLClassLoader {
 
     private static final String JAVA_PACKAGE_PREFIX = "java.";
 
-    private Logger logger;
+    private final PluginDescriptor descriptor;
+    private final Logger logger;
     private final List<ClassLoader> dependencyClassLoaders = new ArrayList<>();
 
     private final Set<Class<?>> loadedClass = new HashSet<>();
 
-    public PluginClassLoader(Path src, Logger logger, ClassLoader parent) {
+    public PluginClassLoader(PluginDescriptor descriptor, ClassLoader parent) {
         super(new URL[0], parent);
-        this.logger = logger;
-        addPath(src);
+        this.descriptor = descriptor;
+        this.logger = LoggerFactory.getLogger(descriptor.getId());
+        addPath(descriptor.getPluginPath());
     }
 
-    public void addDependency(PluginClassLoader dependency) {
-        dependencyClassLoaders.add(dependency);
-    }
-
-    @Override
-    public void addURL(URL url) {
-        super.addURL(url);
-    }
-
-    public void addPath(Path path) {
-        try {
-            addURL(path.toUri().toURL());
-        } catch (MalformedURLException e) {
-            logger.error(e.getMessage(), e);
-        }
+    public boolean isBeLoaded(Class<?> clazz) {
+        return loadedClass.contains(clazz);
     }
 
     public List<ClassLoader> getDependencyClassLoaders() {
         return dependencyClassLoaders;
     }
 
-    @Override
-    public URL getResource(String name) {
-        URL resource = findResource(name);
-        if (resource != null)
-            return resource;
+    public void addDependency(PluginClassLoader dependency) {
+        dependencyClassLoaders.add(dependency);
+    }
 
-        resource = findResourceFromDependencies(name);
-        if (resource != null)
-            return resource;
-
-        return super.getResource(name);
+    protected void addPath(Path path) {
+        try {
+            addURL(path.toUri().toURL());
+        } catch (MalformedURLException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -102,16 +91,6 @@ public abstract class PluginClassLoader extends URLClassLoader {
             } catch (ClassNotFoundException e) {
                 // Try load class from next dependency.
             }
-        }
-        return null;
-    }
-
-    private URL findResourceFromDependencies(String name) {
-        URL resource;
-        for (ClassLoader classLoader : dependencyClassLoaders) {
-            resource = classLoader.getResource(name);
-            if (resource != null)
-                return resource;
         }
         return null;
     }

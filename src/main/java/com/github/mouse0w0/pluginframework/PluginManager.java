@@ -7,13 +7,11 @@ import java.util.List;
 
 public interface PluginManager {
 
-    PluginContainer loadPlugin(Path path);
+    PluginContainer loadPlugin(Path pluginPath);
 
     List<PluginContainer> loadPlugin(PluginSource pluginSource);
 
-    default void unloadPlugin(PluginContainer container) {
-        throw new UnsupportedOperationException("Cannot unload plugin");
-    }
+    void unloadPlugin(PluginContainer container);
 
     default void unloadPlugin(String pluginId) {
         unloadPlugin(getPlugin(pluginId));
@@ -28,4 +26,13 @@ public interface PluginManager {
     ComparableVersion getSystemVersion();
 
     void setSystemVersion(ComparableVersion version);
+
+    void loadPlugins();
+
+    default void unloadPlugins() {
+        List<PluginContainer> containers = getPlugins();
+        for (int i = containers.size() - 1; i >= 0; i--) {
+            unloadPlugin(containers.get(i));
+        }
+    }
 }
