@@ -29,16 +29,8 @@ public abstract class PluginClassLoader extends URLClassLoader {
         addPath(descriptor.getPluginPath());
     }
 
-    public boolean isBeLoaded(Class<?> clazz) {
-        return loadedClass.contains(clazz);
-    }
-
     public List<ClassLoader> getDependencyClassLoaders() {
         return dependencyClassLoaders;
-    }
-
-    public void addDependency(PluginClassLoader dependency) {
-        dependencyClassLoaders.add(dependency);
     }
 
     protected void addPath(Path path) {
@@ -84,7 +76,7 @@ public abstract class PluginClassLoader extends URLClassLoader {
         }
     }
 
-    private Class<?> loadClassFromDependencies(String name) {
+    protected Class<?> loadClassFromDependencies(String name) {
         for (ClassLoader classLoader : dependencyClassLoaders) {
             try {
                 return classLoader.loadClass(name);

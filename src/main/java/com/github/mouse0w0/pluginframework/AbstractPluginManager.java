@@ -1,50 +1,47 @@
 package com.github.mouse0w0.pluginframework;
 
-import com.github.mouse0w0.pluginframework.exception.InvalidPluginException;
 import com.github.mouse0w0.pluginframework.exception.PluginAlreadyLoadedException;
+import com.github.mouse0w0.pluginframework.exception.PluginClassLoaderException;
+import com.github.mouse0w0.pluginframework.exception.PluginException;
+import com.github.mouse0w0.pluginframework.exception.PluginInitializationException;
 import com.github.mouse0w0.version.ComparableVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public abstract class AbstractPluginManager implements PluginManager {
 
     private final Logger logger = LoggerFactory.getLogger(PluginManager.class);
 
-    private final List<PluginContainer> pluginContainers = new LinkedList<>();
-    private final List<PluginContainer> unmodifiablePluginContainers = Collections.unmodifiableList(pluginContainers);
+    protected final Map<String, PluginContainer> pluginContainers = new HashMap<>();
 
     private ComparableVersion systemVersion;
 
-    private PluginDescriptorFinder pluginDescriptorFinder;
-    private PluginClassLoaderFactory pluginClassLoaderFactory;
-    private PluginInstanceFactory pluginInstanceFactory;
-    private DependencyManager dependencyManager;
+    private PluginDescriptorFinder pluginDescriptorFinder = createPluginDescriptorFinder();
+    private PluginClassLoaderFactory pluginClassLoaderFactory = createPluginClassLoaderFactory();
+    private PluginInstanceFactory pluginInstanceFactory = createPluginInstanceFactory();
+    private DependencyManager dependencyManager = createDependencyManager();
+
+    abstract protected PluginDescriptorFinder createPluginDescriptorFinder();
+
+    abstract protected PluginClassLoaderFactory createPluginClassLoaderFactory();
+
+    abstract protected PluginInstanceFactory createPluginInstanceFactory();
+
+    abstract protected DependencyManager createDependencyManager();
 
     @Override
     public PluginContainer loadPlugin(Path pluginPath) {
-        try {
-            PluginDescriptor pluginDescriptor = pluginDescriptorFinder.findDescriptor(pluginPath);
-            return loadPlugin(pluginDescriptor);
-        } catch (InvalidPluginException e) {
-            logger.warn(String.format("Plugin descriptor not found. Plugin path: %s", pluginPath.toAbsolutePath()), e);
-            throw e;
-        }
+        return loadPlugin(pluginDescriptorFinder.findDescriptor(pluginPath));
     }
 
     @Override
-    public List<PluginContainer> loadPlugin(PluginSource pluginSource) {
+    public Collection<PluginContainer> loadPlugin(PluginSource pluginSource) {
         List<PluginDescriptor> descriptors = new LinkedList<>();
         for (Path pluginPath : pluginSource.getPluginPaths()) {
-            try {
-                descriptors.add(pluginDescriptorFinder.findDescriptor(pluginPath));
-            } catch (InvalidPluginException e) {
-                logger.warn(String.format("Plugin descriptor not found. Plugin path: %s", pluginPath.toAbsolutePath()), e);
-            }
+            descriptors.add(pluginDescriptorFinder.findDescriptor(pluginPath));
         }
 
         dependencyManager.sort(descriptors);
@@ -62,34 +59,44 @@ public abstract class AbstractPluginManager implements PluginManager {
             throw new PluginAlreadyLoadedException(String.format("Plugin %s has been loaded.", descriptor.getId()));
         }
 
-        PluginClassLoader classLoader = pluginClassLoaderFactory.create(descriptor);
-        if (classLoader == null) {
+        dependencyManager.validateDependency(this, descriptor);
 
+        PluginClassLoader classLoader;
+        try {
+            classLoader = pluginClassLoaderFactory.create(this, descriptor);
+        } catch (Exception e) {
+            throw new PluginClassLoaderException(String.format("Cannot create plugin classloader. Plugin: %s", descriptor.getId()));
         }
 
-        Object instance = pluginInstanceFactory.create(descriptor, classLoader);
-        if (instance == null) {
-
+        Object instance;
+        try {
+            instance = pluginInstanceFactory.create(descriptor, classLoader);
+        } catch (Exception e) {
+            throw new PluginInitializationException(String.format("Cannot create plugin instance. Plugin: %s", descriptor.getId()), e);
         }
 
         PluginContainer container = new PluginContainerImpl(descriptor, classLoader, instance);
-        pluginContainers.add(container);
+        pluginContainers.put(descriptor.getId(), container);
         return container;
     }
 
     @Override
-    public List<PluginContainer> getPlugins() {
-        return unmodifiablePluginContainers;
+    public Collection<PluginContainer> getPlugins() {
+        return pluginContainers.values();
     }
 
     @Override
     public PluginContainer getPlugin(String pluginId) {
-        return pluginContainers.stream().filter(container -> container.getDescriptor().getId().equals(pluginId)).findFirst().orElse(null);
+        return pluginContainers.get(pluginId);
     }
 
     @Override
     public PluginContainer whichPlugin(Class<?> clazz) {
-        return pluginContainers.stream().filter(container -> container.getClassLoader().isBeLoaded(clazz)).findFirst().orElse(null);
+        for (PluginContainer container : getPlugins()) {
+            if (container.getClassLoader() == clazz.getClassLoader())
+                return container;
+        }
+        return null;
     }
 
     @Override
@@ -100,5 +107,32 @@ public abstract class AbstractPluginManager implements PluginManager {
     @Override
     public void setSystemVersion(ComparableVersion version) {
         this.systemVersion = version;
+    }
+
+    @Override
+    public void unloadPlugin(PluginContainer container) {
+        if (!pluginContainers.containsKey(container.getDescriptor().getId()))
+            return;
+        validateUnloadable(container);
+        forceUnloadPlugin(container);
+    }
+
+    protected void validateUnloadable(PluginContainer container) {
+        Object instance = container.getInstance();
+        if (!(instance instanceof Unloadable))
+            throw new PluginException(String.format("Cannot unload this plugin. Because plugin %s is not Unloadable.", container.getDescriptor().getId()));
+
+        for (PluginContainer child : dependencyManager.getChildren(getPlugins(), container)) {
+            validateUnloadable(child);
+        }
+    }
+
+    protected void forceUnloadPlugin(PluginContainer container) {
+        for (PluginContainer child : dependencyManager.getChildren(getPlugins(), container)) {
+            forceUnloadPlugin(child);
+        }
+
+        ((Unloadable) container.getInstance()).onUnload();
+        pluginContainers.remove(container);
     }
 }

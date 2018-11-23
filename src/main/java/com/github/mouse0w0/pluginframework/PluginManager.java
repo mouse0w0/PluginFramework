@@ -3,13 +3,13 @@ package com.github.mouse0w0.pluginframework;
 import com.github.mouse0w0.version.ComparableVersion;
 
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
 
 public interface PluginManager {
 
     PluginContainer loadPlugin(Path pluginPath);
 
-    List<PluginContainer> loadPlugin(PluginSource pluginSource);
+    Collection<PluginContainer> loadPlugin(PluginSource pluginSource);
 
     void unloadPlugin(PluginContainer container);
 
@@ -17,7 +17,7 @@ public interface PluginManager {
         unloadPlugin(getPlugin(pluginId));
     }
 
-    List<PluginContainer> getPlugins();
+    Collection<PluginContainer> getPlugins();
 
     PluginContainer getPlugin(String pluginId);
 
@@ -30,9 +30,8 @@ public interface PluginManager {
     void loadPlugins();
 
     default void unloadPlugins() {
-        List<PluginContainer> containers = getPlugins();
-        for (int i = containers.size() - 1; i >= 0; i--) {
-            unloadPlugin(containers.get(i));
+        for (PluginContainer container : getPlugins()) {
+            unloadPlugin(container);
         }
     }
 }
