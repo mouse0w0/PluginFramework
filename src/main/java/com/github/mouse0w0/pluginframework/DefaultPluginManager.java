@@ -10,7 +10,7 @@ public class DefaultPluginManager extends AbstractPluginManager {
 
     @Override
     protected PluginDescriptorFinder createPluginDescriptorFinder() {
-        return null;
+        return new PropertiesPluginDescriptorFinder();
     }
 
     @Override

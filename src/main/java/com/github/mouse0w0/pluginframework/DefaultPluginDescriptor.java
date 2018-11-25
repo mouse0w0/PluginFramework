@@ -3,6 +3,8 @@ package com.github.mouse0w0.pluginframework;
 import com.github.mouse0w0.version.ComparableVersion;
 
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +20,7 @@ public class DefaultPluginDescriptor implements PluginDescriptor {
     private final List<DependencyItem> befores;
     private final List<DependencyItem> afters;
     private final List<DependencyItem> requires;
-    private final Map<String, Object> metadata;
+    private final Map<String, Object> metadata = new HashMap<>();
 
     public DefaultPluginDescriptor(String id, ComparableVersion version, Path pluginPath, String name, String mainClass, String description, List<String> authors, List<DependencyItem> befores, List<DependencyItem> afters, List<DependencyItem> requires, Map<String, Object> metadata) {
         this.id = id;
@@ -31,7 +33,7 @@ public class DefaultPluginDescriptor implements PluginDescriptor {
         this.befores = befores;
         this.afters = afters;
         this.requires = requires;
-        this.metadata = metadata;
+        this.metadata.putAll(metadata);
     }
 
     @Override
@@ -100,11 +102,13 @@ public class DefaultPluginDescriptor implements PluginDescriptor {
         private String name;
         private String mainClass;
         private String description;
-        private List<String> authors;
-        private List<DependencyItem> befores;
-        private List<DependencyItem> afters;
-        private List<DependencyItem> requires;
-        private Map<String, Object> metadata;
+        private List<String> authors = Collections.emptyList();
+        private List<DependencyItem> befores = Collections.emptyList();
+        private List<DependencyItem> afters = Collections.emptyList();
+        ;
+        private List<DependencyItem> requires = Collections.emptyList();
+        ;
+        private Map<String, Object> metadata = Collections.emptyMap();
 
         private Builder() {
         }
