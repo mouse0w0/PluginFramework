@@ -1,4 +1,4 @@
-<?xml versionRange="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -6,7 +6,7 @@
 
     <groupId>com.github.mouse0w0</groupId>
     <artifactId>pluginframework</artifactId>
-    <versionRange>1.0.0</versionRange>
+    <version>1.0.0</version>
 
     <name>PluginFramework</name>
 
@@ -32,29 +32,29 @@
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <versionRange>5.2</versionRange>
+            <version>5.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <versionRange>1.8.0-beta2</versionRange>
+            <version>1.8.0-beta2</version>
         </dependency>
         <dependency>
             <groupId>com.github.Mouse0w0</groupId>
             <artifactId>Version</artifactId>
-            <versionRange>1.0.0</versionRange>
+            <version>1.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <versionRange>4.12</versionRange>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <versionRange>1.8.0-beta2</versionRange>
+            <version>1.8.0-beta2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
