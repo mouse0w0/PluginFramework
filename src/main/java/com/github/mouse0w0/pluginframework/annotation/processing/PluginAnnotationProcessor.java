@@ -44,6 +44,8 @@ public class PluginAnnotationProcessor extends AbstractProcessor {
             }
 
             Element element = elements.iterator().next();
+            properties.put("mainClass", ((TypeElement) element).getQualifiedName().toString());
+
             Plugin plugin = element.getAnnotation(Plugin.class);
             if (StringUtils.isNullOrEmpty(plugin.id())) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Plugin id cannot be null or empty.");
