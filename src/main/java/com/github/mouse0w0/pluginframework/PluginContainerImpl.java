@@ -7,10 +7,10 @@ public class PluginContainerImpl implements PluginContainer {
 
     private final PluginDescriptor descriptor;
     private final Logger logger;
-    private final PluginClassLoader classLoader;
+    private final ClassLoader classLoader;
     private final Object instance;
 
-    public PluginContainerImpl(PluginDescriptor descriptor, PluginClassLoader classLoader, Object instance) {
+    public PluginContainerImpl(PluginDescriptor descriptor, ClassLoader classLoader, Object instance) {
         this.descriptor = descriptor;
         this.logger = LoggerFactory.getLogger(descriptor.getId());
         this.classLoader = classLoader;
@@ -28,7 +28,7 @@ public class PluginContainerImpl implements PluginContainer {
     }
 
     @Override
-    public PluginClassLoader getClassLoader() {
+    public ClassLoader getClassLoader() {
         return classLoader;
     }
 

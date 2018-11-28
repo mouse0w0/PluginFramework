@@ -61,7 +61,7 @@ public abstract class AbstractPluginManager implements PluginManager {
 
         dependencyManager.validateDependency(this, descriptor);
 
-        PluginClassLoader classLoader;
+        ClassLoader classLoader;
         try {
             classLoader = pluginClassLoaderFactory.create(this, descriptor);
         } catch (Exception e) {

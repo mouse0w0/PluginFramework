@@ -14,12 +14,29 @@ import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
 public class PropertiesPluginDescriptorFinder implements PluginDescriptorFinder {
-    private static final Pattern PLUGIN_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_$]+");
+    public static final Pattern DEFAULT_PLUGIN_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_$]+");
+    public static final String DEFAULT_PLUGIN_DESCRIPTOR_FILE_NAME = "plugin.properties";
+
+    private final String pluginDescriptorFileName;
+    private final Pattern pluginNamePattern;
+
+    public PropertiesPluginDescriptorFinder() {
+        this(DEFAULT_PLUGIN_DESCRIPTOR_FILE_NAME, DEFAULT_PLUGIN_NAME_PATTERN);
+    }
+
+    public PropertiesPluginDescriptorFinder(String pluginDescriptorFileName, Pattern pluginNamePattern) {
+        this.pluginDescriptorFileName = pluginDescriptorFileName;
+        this.pluginNamePattern = pluginNamePattern;
+    }
+
+    public String getPluginDescriptorFileName() {
+        return pluginDescriptorFileName;
+    }
 
     @Override
     public PluginDescriptor findDescriptor(Path pluginPath) throws InvalidPluginException {
         try (JarFile jarFile = new JarFile(pluginPath.toFile())) {
-            JarEntry entry = jarFile.getJarEntry("plugin.properties");
+            JarEntry entry = jarFile.getJarEntry(pluginDescriptorFileName);
             if (entry == null) {
                 throw new InvalidPluginException(String.format("Cannot find plugin descriptor. Plugin path: %s", pluginPath.toAbsolutePath()));
             }
@@ -32,7 +49,7 @@ public class PropertiesPluginDescriptorFinder implements PluginDescriptorFinder 
             DefaultPluginDescriptor.Builder builder = DefaultPluginDescriptor.builder().withPluginPath(pluginPath);
 
             String pluginId = properties.getProperty("id");
-            if (StringUtils.isNullOrEmpty(pluginId) && PLUGIN_NAME_PATTERN.matcher(pluginId).matches()) {
+            if (StringUtils.isNullOrEmpty(pluginId) && pluginNamePattern.matcher(pluginId).matches()) {
                 throw new InvalidPluginException("Illegal plugin id.");
             }
             builder.withId(pluginId);

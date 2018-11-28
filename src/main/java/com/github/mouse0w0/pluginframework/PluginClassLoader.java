@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class PluginClassLoader extends URLClassLoader {
+public class PluginClassLoader extends URLClassLoader {
 
     private static final String JAVA_PACKAGE_PREFIX = "java.";
 
